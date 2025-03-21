@@ -6,6 +6,52 @@ use Illuminate\Support\Facades\Log;
 
 trait DateTimeHandlerTrait
 {
+      /**
+       * Converte uma data em formato brasileiro textual para o formato Y-m-d
+       * 
+       * @param string $dateString Data no formato "dia de mês, ano" (ex: "sábado, 15 de março, 2025")
+       * @return string Data no formato Y-m-d
+       */
+      protected function parseGameDate($dateString)
+      {
+            // Converter string de data (ex: "sábado, 15 de março, 2025") para formato Y-m-d
+            try {
+                  $months = [
+                        'janeiro' => '01',
+                        'fevereiro' => '02',
+                        'março' => '03',
+                        'abril' => '04',
+                        'maio' => '05',
+                        'junho' => '06',
+                        'julho' => '07',
+                        'agosto' => '08',
+                        'setembro' => '09',
+                        'outubro' => '10',
+                        'novembro' => '11',
+                        'dezembro' => '12'
+                  ];
+                  
+                  // Extrair dia, mês e ano
+                  preg_match('/(\d+) de (\w+), (\d+)/', $dateString, $matches);
+                  
+                  if (count($matches) >= 4) {
+                        $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+                        $month = $months[mb_strtolower($matches[2])];
+                        $year = $matches[3];
+                        
+                        return "{$year}-{$month}-{$day}";
+                  }
+                  
+                  // Se não conseguir extrair, retorna a data atual
+                  return now()->format('Y-m-d');
+            } catch (\Exception $e) {
+                  Log::error("Erro ao converter data: {$e->getMessage()}", [
+                        'data_string' => $dateString
+                  ]);
+                  return now()->format('Y-m-d');
+            }
+      }
+
       protected function adjustGameDateTime(?string $dateTime)
       {
             if (!$dateTime) {
